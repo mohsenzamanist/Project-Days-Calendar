@@ -1,13 +1,30 @@
 import daysData from "./days.json" with { type: "json" };
+
 const calendarDiv = document.getElementById("calendar");
 const yearEl = document.getElementById("year");
-const monthEl = document.getElementById("month-name");
 const preYearBtn = document.getElementById("pre-year");
 const nextYearBtn = document.getElementById("next-year");
 const preMonthBtn = document.getElementById("pre-month");
 const nextMonthBtn = document.getElementById("next-month");
+const yearSelect = document.getElementById("year-select");
+const monthSelect = document.getElementById("month-select");
 
 const state = {};
+
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
 // controls handlers
 const monthControlsHandler = function (step) {
@@ -21,12 +38,22 @@ const monthControlsHandler = function (step) {
     state.year++;
   }
 
-  renderCalendar(state.month, state.year);
+  update();
 };
 
 const yearControlsHandler = function (step) {
   state.year += step;
-  renderCalendar(state.month, state.year);
+  update();
+};
+
+const monthSelectChangeHandler = function (e) {
+  state.month = +e.target.value;
+  update();
+};
+
+const yearSelectChangeHandler = function (e) {
+  state.year = +e.target.value;
+  update();
 };
 
 // eventListeners
@@ -34,11 +61,14 @@ preMonthBtn.addEventListener("click", () => monthControlsHandler(-1));
 nextMonthBtn.addEventListener("click", () => monthControlsHandler(1));
 preYearBtn.addEventListener("click", () => yearControlsHandler(-1));
 nextYearBtn.addEventListener("click", () => yearControlsHandler(1));
+monthSelect.addEventListener("change", monthSelectChangeHandler);
+yearSelect.addEventListener("change", yearSelectChangeHandler);
 
 // functions
-function renderCalendar(month, year) {
+function renderCalendar() {
+  const { month, year } = state;
   const calendar = generateCalendar(month, year);
-  updateYearMonthEl(month, year);
+
   calendarDiv.innerHTML = "";
 
   const defaultRow = generateDefaultRow();
@@ -70,23 +100,10 @@ function generateDefaultRow() {
   });
 }
 
-function updateYearMonthEl(month, year) {
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-  monthEl.textContent = months[month];
-  yearEl.textContent = year;
+function syncUI() {
+  const { month, year } = state;
+  yearSelect.value = year;
+  monthSelect.value = month;
 }
 
 function generateCalendar(month, year) {
@@ -125,8 +142,45 @@ function initState() {
   state.year = year;
 }
 
+function generateMonthDropdown() {
+  const options = MONTHS.map((month, i) => {
+    const option = document.createElement("option");
+    option.value = i;
+    option.textContent = month;
+    return option;
+  });
+  monthSelect.append(...options);
+}
+
+function generateYearDropdown() {
+  const yearRange = 50;
+  const fullYear = new Date().getFullYear();
+  const beforeFullYear = Array.from(
+    { length: yearRange },
+    (_, i) => fullYear - i,
+  ).reverse();
+  const afterFullYear = Array.from(
+    { length: yearRange },
+    (_, i) => fullYear + 1 + i,
+  );
+  const years = [...beforeFullYear, ...afterFullYear];
+  const options = years.map((year) => {
+    const option = document.createElement("option");
+    option.value = year;
+    option.textContent = year;
+    return option;
+  });
+  yearSelect.append(...options);
+}
+
+function update() {
+  renderCalendar();
+  syncUI();
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   initState();
-
-  renderCalendar(state.month, state.year);
+  generateMonthDropdown();
+  generateYearDropdown();
+  update();
 });
