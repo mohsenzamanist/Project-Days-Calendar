@@ -26,6 +26,17 @@ const MONTHS = [
   "December",
 ];
 
+const OCCURRENCE = { first: 1, second: 2, third: 3, fourth: 4, last: 5 };
+const DAYS = {
+  Sunday: 0,
+  Monday: 1,
+  Tuesday: 2,
+  Wednesday: 3,
+  Thursday: 4,
+  Friday: 5,
+  Saturday: 6,
+};
+
 // controls handlers
 const monthControlsHandler = function (step) {
   state.month += step;
@@ -68,6 +79,7 @@ yearSelect.addEventListener("change", yearSelectChangeHandler);
 function renderCalendar() {
   const { month, year } = state;
   const calendar = generateCalendar(month, year);
+  const specialDays = mapDaysToCalendar();
 
   calendarDiv.innerHTML = "";
 
@@ -76,8 +88,20 @@ function renderCalendar() {
 
   calendar.forEach((item) => {
     const cell = document.createElement("div");
+
     cell.className = item.currentMonth ? "cell" : "cell other-month";
+
     cell.textContent = item.day;
+
+    const specialDay = specialDays.find(
+      (d) => d.date === item.day && item.currentMonth,
+    );
+
+    if (specialDay) {
+      cell.classList.add("special-day");
+      cell.title = specialDay.name;
+    }
+
     calendarDiv.appendChild(cell);
   });
 }
@@ -178,8 +202,60 @@ function update() {
   syncUI();
 }
 
+function mapDaysToCalendar() {
+  const { year, month } = state;
+
+  const dates = [];
+
+  for (const day of daysData) {
+    if (MONTHS[month] !== day.monthName) continue;
+
+    const weekday = DAYS[day.dayName];
+    const occurrence = OCCURRENCE[day.occurrence];
+
+    let date;
+
+    if (day.occurrence === "last") {
+      date = getLastOccurrence(year, month, weekday);
+    } else {
+      date = getOccurrence(year, month, weekday, occurrence);
+    }
+
+    dates.push({
+      date,
+      name: day.name,
+      descriptionURL: day.descriptionURL,
+    });
+  }
+
+  return dates;
+}
+
+function getOccurrence(year, month, weekday, occurrence) {
+  const firstDay = new Date(year, month, 1).getDay();
+
+  let offset = weekday - firstDay;
+
+  if (offset < 0) {
+    offset += 7;
+  }
+
+  return 1 + offset + (occurrence - 1) * 7;
+}
+
+function getLastOccurrence(year, month, weekday) {
+  let date = new Date(year, month + 1, 0).getDate();
+
+  while (new Date(year, month, date).getDay() !== weekday) {
+    date--;
+  }
+
+  return date;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   initState();
+  mapDaysToCalendar();
   generateMonthDropdown();
   generateYearDropdown();
   update();

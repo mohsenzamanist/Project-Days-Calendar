@@ -32,3 +32,8 @@
 .other-month{
   color:rgb(170, 160, 160)
 }
+
+.special-day {
+  background: gold;
+  font-weight: bold;
+}
