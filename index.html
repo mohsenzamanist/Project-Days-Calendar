@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
+        <title>Calendar</title>
         <link rel="stylesheet" href="style.css">
         <script type="module" src="common.mjs"></script>
         <script type="module" src="web.mjs"></script>
@@ -9,11 +10,13 @@
         <main>
             <div class="controls" id="controls">
                 <div class="year-div" id="year-div">
+                    <label for="year-select">Year:</label>
                     <button class="pre-year" id="pre-year">&larr;</button>
                     <select name="year-select" id="year-select"></select>
                     <button class="next-year" id="next-year">&rarr;</button>
                 </div>
                 <div class="month-div" id="month-div">
+                    <label for="month-select">Month:</label>
                     <button class="pre-month" id="pre-month">&larr;</button>
                     <select name="month-select" id="month-select"></select>
                     <button class="next-month" id="next-month">&rarr;</button>
